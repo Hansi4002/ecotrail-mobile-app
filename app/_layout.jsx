@@ -9,7 +9,9 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="trail/add" />
           <Stack.Screen name="trail/[id]" />
+          <Stack.Screen name="trail/edit/[id]" />
         </Stack>
       </TrailProvider>
     </AuthProvider>
