@@ -178,7 +178,7 @@ npx expo start --web
 
 ### Method 1: Download APK (Android)
 
-**Direct Download:** [Download APK](https://expo.dev/artifacts/eas/AN9z6l6PnV4b6-inaX9ugFrEVjxurt-LEbJMZ0VcvwM.apk)
+**Direct Download:** [Download APK](https://expo.dev/artifacts/eas/wyLcwmtmqlIiiRZDkPM2ekzYEhUMiA6BCL6m5A3bgRE.apk)
 
 **Or from Expo Builds:**
 1. Go to [Expo Builds](https://expo.dev/accounts/hansani2004/projects/ecotrail/builds)
