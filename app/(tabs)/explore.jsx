@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   StatusBar,
   Dimensions,
+  TextInput,
 } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import { useRouter } from 'expo-router';
@@ -23,6 +24,7 @@ export default function Explore() {
   const [loading, setLoading] = useState(true);
   const [tracking, setTracking] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const mapRef = useRef(null);
   const { trails } = useTrails();
   const router = useRouter();
@@ -46,6 +48,39 @@ export default function Explore() {
         longitudeDelta: 2,
       });
       setLoading(false);
+    }
+  };
+
+  //Search Location
+  const searchLocation = async () => {
+    if (!searchQuery.trim()) {
+      Alert.alert('Search', 'Please enter a place name');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=5&countrycodes=LK`
+      );
+      const data = await response.json();
+
+      if (data.length > 0) {
+        const result = data[0];
+        const newRegion = {
+          latitude: parseFloat(result.lat),
+          longitude: parseFloat(result.lon),
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        };
+        setRegion(newRegion);
+        mapRef.current?.animateToRegion(newRegion, 1000);
+        Alert.alert('Found', `📍 ${result.display_name}`);
+      } else {
+        Alert.alert('Not Found', 'No results found for this location');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to search location. Please try again.');
+      console.error('Search error:', error);
     }
   };
 
@@ -79,11 +114,6 @@ export default function Explore() {
     );
   }
 
-  // Count trails by difficulty
-  const easyCount = trails.filter(t => t.difficulty === 'Easy').length;
-  const mediumCount = trails.filter(t => t.difficulty === 'Medium').length;
-  const hardCount = trails.filter(t => t.difficulty === 'Hard').length;
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
@@ -93,6 +123,28 @@ export default function Explore() {
         <View style={styles.titleContainer}>
           <Text style={styles.title}>🗺️ Explore</Text>
           <Text style={styles.subtitle}>Find trails near you</Text>
+        </View>
+
+        {/*  Search Bar */}
+        <View style={styles.searchContainer}>
+          <Ionicons name="search-outline" size={20} color="#999" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search for a place..."
+            placeholderTextColor="#999"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onSubmitEditing={searchLocation}
+            returnKeyType="search"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Ionicons name="close-circle" size={20} color="#999" />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity onPress={searchLocation} style={styles.searchButton}>
+            <Ionicons name="search" size={20} color="#fff" />
+          </TouchableOpacity>
         </View>
 
         {/* Map */}
@@ -165,37 +217,12 @@ export default function Explore() {
           </View>
         )}
 
-        {/* Enhanced Bottom Bar */}
-        <View style={styles.bottomBar}>
-          <View style={styles.bottomBarLeft}>
-            <Ionicons name="trail-sign-outline" size={20} color="#2E7D32" />
-            <Text style={styles.bottomBarCount}>{trails.length}</Text>
-            <Text style={styles.bottomBarLabel}>Trails</Text>
-          </View>
-          
-          <View style={styles.bottomBarDivider} />
-          
-          <View style={styles.bottomBarStats}>
-            <View style={styles.bottomBarStat}>
-              <View style={[styles.dot, styles.dotEasy]} />
-              <Text style={styles.bottomBarStatText}>{easyCount}</Text>
-            </View>
-            <View style={styles.bottomBarStat}>
-              <View style={[styles.dot, styles.dotMedium]} />
-              <Text style={styles.bottomBarStatText}>{mediumCount}</Text>
-            </View>
-            <View style={styles.bottomBarStat}>
-              <View style={[styles.dot, styles.dotHard]} />
-              <Text style={styles.bottomBarStatText}>{hardCount}</Text>
-            </View>
-          </View>
-          
-          <TouchableOpacity 
-            style={styles.bottomBarButton}
-            onPress={() => router.push('/(tabs)')}
-          >
-            <Ionicons name="list-outline" size={20} color="#fff" />
-          </TouchableOpacity>
+        {/* Trail Count */}
+        <View style={styles.trailCount}>
+          <Ionicons name="trail-sign-outline" size={18} color="#2E7D32" />
+          <Text style={styles.trailCountText}>
+            {trails.length} Trails Nearby
+          </Text>
         </View>
       </View>
     </SafeAreaView>
@@ -218,7 +245,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  //  TITLE 
+  //TITLE
   titleContainer: {
     paddingVertical: 12,
     alignItems: 'center',
@@ -235,7 +262,42 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  // MAP 
+  //SEARCH BAR
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 12,
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: '#333',
+    padding: 0,
+    height: 40,
+  },
+  searchButton: {
+    backgroundColor: '#2E7D32',
+    padding: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 36,
+    height: 36,
+  },
+
+  //MAP
   mapContainer: {
     flex: 1,
     borderRadius: 16,
@@ -250,10 +312,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // CONTROLS
+  //CONTROLS
   controls: {
     position: 'absolute',
-    right: 28,
+    right: 24,
     bottom: 100,
     alignItems: 'center',
     gap: 8,
@@ -276,11 +338,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#2E7D32',
   },
 
-  // TRACKING STATUS 
+  //TRACKING STATUS
   trackingStatus: {
     position: 'absolute',
-    top: 80,
-    left: 28,
+    top: 110,
+    left: 20,
     backgroundColor: '#fff',
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -306,85 +368,33 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // ENHANCED BOTTOM BAR 
-  bottomBar: {
+  //TRAIL COUNT
+  trailCount: {
     position: 'absolute',
     bottom: 30,
-    left: 16,
-    right: 16,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    paddingVertical: 12,
+    left: 20,
+    right: 20,
+    backgroundColor: 'rgba(255,255,255,0.95)',
     paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    elevation: 4,
+    justifyContent: 'center',
+    gap: 8,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
   },
-  bottomBarLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  bottomBarCount: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1a1a1a',
-  },
-  bottomBarLabel: {
-    fontSize: 13,
-    color: '#888',
-    fontWeight: '500',
-  },
-  bottomBarDivider: {
-    width: 1,
-    height: 28,
-    backgroundColor: '#e0e0e0',
-  },
-  bottomBarStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  bottomBarStat: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  dotEasy: {
-    backgroundColor: '#4CAF50',
-  },
-  dotMedium: {
-    backgroundColor: '#FF9800',
-  },
-  dotHard: {
-    backgroundColor: '#f44336',
-  },
-  bottomBarStatText: {
+  trailCountText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#333',
   },
-  bottomBarButton: {
-    backgroundColor: '#2E7D32',
-    padding: 8,
-    borderRadius: 10,
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 
-  // CALLOUT 
+  // CALLOUT
   callout: {
     padding: 10,
     width: 200,
