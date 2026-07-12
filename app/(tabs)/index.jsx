@@ -43,7 +43,7 @@ export default function HomeScreen() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.trailCard} onPress={() => router.push(`/trail/${item.id}`)}>
-              {/* 🏔️ Trail Image */}
+              {/*Trail Image */}
               {item.imageUrl ? (
                 <Image source={{ uri: item.imageUrl }} style={styles.trailImage} resizeMode="cover" />
               ) : (
