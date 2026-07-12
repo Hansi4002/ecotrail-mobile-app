@@ -1,10 +1,9 @@
-// services/firebase.js
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
-// Your web app's Firebase configuration
+// web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyD1qQGIUCcly5t-fV33gM_TBARL8LYcd28",
   authDomain: "ecotrail-app.firebaseapp.com",
