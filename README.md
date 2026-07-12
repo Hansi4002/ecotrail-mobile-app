@@ -320,22 +320,4 @@ service firebase.storage {
 
 - **Hansani** - *Developer* - [GitHub](https://github.com/Hansi4002)
 
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-## 🙏 Acknowledgments
-
-- **IJSE** - Institute of Java and Software Engineering
-- **Course Coordinator:** Shamodha Sahan
-- **Firebase** - Backend Services
-- **React Native** - Mobile Framework
-- **Expo** - Development Platform
-
----
-
 **Happy Hiking! 🌿🏔️**
